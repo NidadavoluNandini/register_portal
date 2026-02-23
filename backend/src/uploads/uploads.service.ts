@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UploadsService {
 
- private s3 = new S3Client({
+ private r2Client = new S3Client({
   region: 'auto',
   endpoint: process.env.R2_ENDPOINT!,
   credentials: {
@@ -21,7 +26,7 @@ export class UploadsService {
     const fileKey =
       `resumes/${randomUUID()}-${file.originalname}`;
 
-    await this.s3.send(
+    await this.r2Client.send(
       new PutObjectCommand({
         Bucket: process.env.R2_BUCKET!,
         Key: fileKey,
@@ -31,7 +36,17 @@ export class UploadsService {
     );
 
     return {
+      key: fileKey,
       url: `${process.env.R2_ENDPOINT}/${process.env.R2_BUCKET}/${fileKey}`,
     };
+  }
+
+  async getSignedResumeUrl(key: string) {
+    const command = new GetObjectCommand({
+      Bucket: process.env.R2_BUCKET!,
+      Key: key,
+    });
+
+    return getSignedUrl(this.r2Client, command, { expiresIn: 60 * 60 });
   }
 }

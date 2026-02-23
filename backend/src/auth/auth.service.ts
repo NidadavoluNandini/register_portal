@@ -1,12 +1,13 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { Resend } from 'resend';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
 
   private resend: Resend;
 
-  constructor() {
+  constructor(private readonly usersService: UsersService) {
     // ✅ ENV is available here
 
     this.resend = new Resend(process.env.RESEND_API_KEY);
@@ -19,7 +20,20 @@ export class AuthService {
 
   // ✅ Page 1
   async initiate(data: any) {
-    return this.sendOtp(data.email, data);
+    const email = data?.email?.trim()?.toLowerCase?.() || '';
+
+    const existingUser = await this.usersService.findByEmail(email);
+
+    if (existingUser) {
+      throw new BadRequestException(
+        'Already registered with this email. Please login.',
+      );
+    }
+
+    return this.sendOtp(email, {
+      ...data,
+      email,
+    });
   }
 
   // ✅ Send OTP
@@ -53,7 +67,8 @@ export class AuthService {
 
   // ✅ Resend OTP
   async resendOtp(email: string) {
-    return this.sendOtp(email);
+    const existing = this.otpStore.get(email);
+    return this.sendOtp(email, existing?.data);
   }
 
   // ✅ Verify OTP

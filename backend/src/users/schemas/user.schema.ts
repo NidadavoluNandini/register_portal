@@ -8,7 +8,7 @@ export class User extends Document {
   firstName: string;
 
   @Prop()
-  middleName: string;
+  middleName?: string;
 
   @Prop({ required: true })
   lastName: string;
@@ -21,6 +21,9 @@ export class User extends Document {
 
   @Prop({ required: true })   // ✅ make mandatory
   resumeUrl: string;
+
+  @Prop()
+  resumeKey?: string;
 
   @Prop({ default: false })
   emailVerified: boolean;
