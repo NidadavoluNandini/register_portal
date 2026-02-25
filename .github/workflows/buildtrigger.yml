@@ -1,0 +1,34 @@
+name: Update Build Trigger TXT
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  update-txt:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: dev
+
+      - name: Update build_trigger.txt
+        run: |
+          # Use '>' to replace the content, or '>>' to add a new line
+          echo "Last updated by automation on: $(date '+%Y-%m-%d %H:%M:%S')" >> build_trigger.txt
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add build_trigger.txt
+          # The [skip ci] is vital to prevent an infinite loop
+          git commit -m "chore: update build_trigger.txt [skip ci]" || exit 0
+          git pull --rebase origin dev
+          git push origin dev
