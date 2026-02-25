@@ -11,11 +11,16 @@ async function bootstrap() {
     }),
   );
 
+  // ✅ Allow localhost + deployed frontend
   const allowedOriginPattern = /^http:\/\/(localhost|127\.0\.0\.1):(\d+)$/;
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin || allowedOriginPattern.test(origin)) {
+      if (
+        !origin ||
+        allowedOriginPattern.test(origin) ||
+        origin.includes('vercel.app') // ✅ allow Vercel frontend
+      ) {
         callback(null, true);
         return;
       }
@@ -25,7 +30,12 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(3000);
-  console.log('Backend is running');
+  // ✅ IMPORTANT: Railway dynamic port
+  const PORT = process.env.PORT || 3000;
+
+  await app.listen(PORT, '0.0.0.0');
+
+  console.log(`Backend running on port ${PORT}`);
 }
+
 bootstrap();
