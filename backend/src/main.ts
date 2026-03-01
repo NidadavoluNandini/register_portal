@@ -28,7 +28,7 @@ app.setGlobalPrefix('api', {
     origin: [
       'http://localhost:5173',
       'http://localhost:3000',
-      'https://candidateportal-two.vercel.app/', // 🔁 replace with your Vercel URL
+      'https://candidateportal-two.vercel.app', // 🔁 replace with your Vercel URL
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
