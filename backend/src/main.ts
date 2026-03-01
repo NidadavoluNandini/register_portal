@@ -17,8 +17,9 @@ async function bootstrap() {
    * All routes become:
    * https://your-domain/api/...
    */
-  app.setGlobalPrefix('api');
-
+app.setGlobalPrefix('api', {
+  exclude: ['/'],
+});
   /**
    * ✅ CORS Configuration
    * Allow frontend + local development
